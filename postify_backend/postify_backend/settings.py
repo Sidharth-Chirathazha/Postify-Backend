@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'users',
 ]
@@ -59,6 +59,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'postify_backend.urls'
 
@@ -107,6 +113,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+AUTH_USER_MODEL = 'users.User'
+
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailOrUsernameBackend',  
+    'django.contrib.auth.backends.ModelBackend', 
+]
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -131,6 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "users.authentication.JWTAuthenticationFromCookie", 
         "rest_framework_simplejwt.authentication.JWTAuthentication",  
     ),
     "DEFAULT_PERMISSION_CLASSES": (
@@ -141,9 +156,9 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  # Access token expires in 30 mins
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token lasts 7 days
-    "ROTATE_REFRESH_TOKENS": True,  # Generates a new refresh token upon refresh
-    "BLACKLIST_AFTER_ROTATION": True,  # Blacklist old refresh token after rotation
-    "AUTH_HEADER_TYPES": ("Bearer",),  # Uses 'Bearer <token>' format in Authorization header
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  
+    "ROTATE_REFRESH_TOKENS": True,  
+    "BLACKLIST_AFTER_ROTATION": True,  
+    "AUTH_HEADER_TYPES": ("Bearer",),  
 }
