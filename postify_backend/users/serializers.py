@@ -61,14 +61,21 @@ class LoginSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    role = serializers.CharField()
 
     def validate(self, data):
-        user = authenticate(username=data["username"], password=data["password"])
+        username = data.get("username")
+        password = data.get("password")
+        role = data.get("role") 
+
+        user = authenticate(username=username, password=password)
         
         if user is None:
             raise serializers.ValidationError("Invalid credentials. Please try again")
         if not user.is_active:
             raise serializers.ValidationError("Your account has been deactivated. Please contact support")
+        if user.role != role:
+            raise serializers.ValidationError(f"You are not authorized to login as {role}")
         
         return user
     

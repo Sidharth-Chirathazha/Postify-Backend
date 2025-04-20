@@ -47,7 +47,7 @@ class UserProfileView(APIView):
                 if User.objects.filter(username=new_username).exclude(id=user.id).exists():
                     return Response({"error": "This username is already taken."}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            return Response({"message": "Profile updated successfully."})
+            return Response({"message": "Profile updated successfully.", "user": serializer.data}, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
