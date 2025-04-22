@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import AccessToken,TokenError
 
 User = get_user_model()
 
@@ -27,9 +27,14 @@ class JWTAuthenticationFromCookie(BaseAuthentication):
 
         try:
             access_token = AccessToken(token)
-            user = User.objects.get(id=access_token['user_id'])
+            user_id = access_token['user_id']
+            user = User.objects.get(id=user_id)
+        except TokenError as e:
+            raise AuthenticationFailed({'detail': 'Token has expired or is invalid'}, code='token_not_valid')
+        except User.DoesNotExist:
+            raise AuthenticationFailed({'detail': 'User not found'}, code='user_not_found')
         except Exception:
-            raise AuthenticationFailed('Invalid or expired token')
+            raise AuthenticationFailed({'detail': 'Authentication failed'}, code='authentication_failed')
 
         return (user, None)
     

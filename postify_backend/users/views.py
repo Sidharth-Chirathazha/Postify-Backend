@@ -9,10 +9,16 @@ from django.db.utils import IntegrityError
 from rest_framework.views import APIView
 from .serializers import RegistrationSerializer,LoginSerializer,UserSerializer,LogoutSerializer
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from datetime import timedelta
 
 
 User = get_user_model()
 # Create your views here.
+
+ACCESS_EXPIRE_SECONDS = int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds())
+REFRESH_EXPIRE_SECONDS = int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds())
+
 
 class RegistrationView(APIView):
     permission_classes = [AllowAny]
@@ -71,7 +77,7 @@ class LoginView(APIView):
                 httponly=True,
                 secure=True,
                 samesite='Lax',
-                max_age=60 * 5
+                max_age=ACCESS_EXPIRE_SECONDS
             )
             response.set_cookie(
                 key='refresh_token',
@@ -79,7 +85,7 @@ class LoginView(APIView):
                 httponly=True,
                 secure=True,
                 samesite='Lax',
-                max_age=60 * 60 * 24 * 7,
+                max_age=REFRESH_EXPIRE_SECONDS,
             )
             return response
         
@@ -119,6 +125,6 @@ class CustomTokenRefreshView(TokenRefreshView):
             httponly=True,
             secure=True,
             samesite='Lax',
-            max_age=60 * 5, 
+            max_age=ACCESS_EXPIRE_SECONDS, 
         )
         return response
