@@ -104,9 +104,6 @@ The API should now be accessible at `FRONTEND_BASE_URL/api/`
 
 The API uses JWT (JSON Web Token) authentication. Include the token in the Cookies:
 
-```
-Authorization: Bearer <your-access-token>
-```
 
 ## 🤝 Contributing
 
