@@ -1,6 +1,6 @@
 # Postify Backend API
 
-![Postify Logo](https://res.cloudinary.com/dz9kgofdy/image/upload/v1/postify/logo)
+
 
 ## 📝 Overview
 
