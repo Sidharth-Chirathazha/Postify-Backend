@@ -33,12 +33,12 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_replies(self, obj):
         if obj.replies.exists():
             replies = obj.replies.filter(is_active=True)
-            return CommentSerializer(replies, many=True).data
+            return CommentSerializer(replies, many=True, context=self.context).data
         return []
     
 class BlogPostSerializer(serializers.ModelSerializer):
     author = UserBlogSerializer(read_only=True)
-    comments = CommentSerializer(many=True, read_only=True)
+    comments = serializers.SerializerMethodField()
     like_count = serializers.IntegerField(read_only=True)
     read_count = serializers.IntegerField(read_only=True)
     is_liked = serializers.SerializerMethodField()
@@ -48,7 +48,10 @@ class BlogPostSerializer(serializers.ModelSerializer):
         model = BlogPost
         fields = ['id', 'author', 'title', 'content', 'image_1', 'image_2', 'image_3', 'created_at', 'updated_at', 'is_active', 'like_count', 'read_count', 'comments', 'is_liked', 'is_read']
 
-    
+    def get_comments(self, obj):
+        active_comments = obj.comments.filter(is_active=True, parent_comment__isnull=True)
+        return CommentSerializer(active_comments, many=True, context=self.context).data
+
     def get_is_liked(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:

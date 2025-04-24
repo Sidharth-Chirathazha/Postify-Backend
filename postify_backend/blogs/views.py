@@ -4,7 +4,8 @@ from rest_framework.exceptions import PermissionDenied,NotFound
 from rest_framework.response import Response
 from .models import BlogPost, Comment, BlogLike, BlogRead
 from .serializers import BlogPostSerializer, CommentSerializer, BlogLikeSerializer, BlogReadSerializer
-from django.db import IntegrityError
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 # Create your views here.
 
@@ -13,18 +14,18 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
     Custom permission to only allow authors of a blog post to edit or delete it.
     """
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
-        
-        # Write permissions are only allowed to the author of the blog post.
         return obj.author == request.user
 
 class BlogPostViewSet(viewsets.ModelViewSet):
-    queryset = BlogPost.objects.all().order_by('-created_at')
+    queryset = BlogPost.objects.filter(is_active=True).order_by('-created_at')
     serializer_class = BlogPostSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    search_fields = ['title', 'author__username']
+    ordering_fields = ['created_at','read_count']
+    ordering = ['-created_at']
 
     def perform_create(self, serializer):
         try:
@@ -129,18 +130,9 @@ class CommentDeleteView(APIView):
             comment = Comment.objects.get(pk=comment_id)
 
             if comment.user == request.user:
-                # Owner can permanently delete
+               
                 comment.delete()
                 return Response({'message': 'Comment deleted'}, status=status.HTTP_200_OK)
-
-            elif request.user.is_staff:
-                # Admin performs soft delete
-                if not comment.is_active:
-                    return Response({'message': 'Comment is already deleted'}, status=status.HTTP_200_OK)
-
-                comment.is_active = False
-                comment.save()
-                return Response({'message': 'Comment Blocked'}, status=status.HTTP_200_OK)
 
             else:
                 return Response({'error': 'You do not have permission to delete this comment'}, status=status.HTTP_403_FORBIDDEN)

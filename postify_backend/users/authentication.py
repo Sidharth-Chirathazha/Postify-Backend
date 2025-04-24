@@ -29,6 +29,8 @@ class JWTAuthenticationFromCookie(BaseAuthentication):
             access_token = AccessToken(token)
             user_id = access_token['user_id']
             user = User.objects.get(id=user_id)
+            if not user.is_active:
+                raise AuthenticationFailed({'detail': 'User account is deactivated'}, code='user_inactive')
         except TokenError as e:
             raise AuthenticationFailed({'detail': 'Token has expired or is invalid'}, code='token_not_valid')
         except User.DoesNotExist:

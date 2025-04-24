@@ -46,6 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     profile_pic = models.URLField(blank=True, null=True)
+    date_joined = models.DateTimeField(auto_now_add=True, null=True)
 
     objects = CustomUserManager()
 

@@ -68,14 +68,20 @@ class LoginSerializer(serializers.Serializer):
         password = data.get("password")
         role = data.get("role") 
 
-        user = authenticate(username=username, password=password)
-        
-        if user is None:
-            raise serializers.ValidationError("Invalid credentials. Please try again")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid credentials. Please try again.")
+
         if not user.is_active:
-            raise serializers.ValidationError("Your account has been deactivated. Please contact support")
+            raise serializers.ValidationError("Your account has been deactivated. Please contact support.")
+
         if user.role != role:
-            raise serializers.ValidationError(f"You are not authorized to login as {role}")
+            raise serializers.ValidationError(f"You are not authorized to login as {role}.")
+
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise serializers.ValidationError("Invalid credentials. Please try again.")
         
         return user
     
