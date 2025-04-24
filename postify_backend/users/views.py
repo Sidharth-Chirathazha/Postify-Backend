@@ -76,7 +76,7 @@ class LoginView(APIView):
                 value=access_token,
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite='None',
                 max_age=ACCESS_EXPIRE_SECONDS
             )
             response.set_cookie(
@@ -84,7 +84,7 @@ class LoginView(APIView):
                 value=refresh_token,
                 httponly=True,
                 secure=True,
-                samesite='Lax',
+                samesite='None',
                 max_age=REFRESH_EXPIRE_SECONDS,
             )
             return response
@@ -124,7 +124,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             value=str(access_token),
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=ACCESS_EXPIRE_SECONDS, 
         )
         return response
