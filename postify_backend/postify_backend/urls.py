@@ -22,5 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('users.urls')),
     path('api/blog/', include('blogs.urls')),
+    path('api/admin/', include('adminuser.urls')),
     path('api/cloudinary-signature/', get_upload_signature, name='cloudinary_signature'),
 ]
